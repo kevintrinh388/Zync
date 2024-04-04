@@ -14,7 +14,19 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
+  id           Int    @id @default(autoincrement())
+  email        String @unique
+  username     String @unique
+  password     String
+  sentMail     Mail[] @relation(name: "sentMail")
+  receivedMail Mail[] @relation(name: "receivedMail")
+}
+
+model Mail {
+  id          Int     @id @default(autoincrement())
+  sender      User?   @relation("sentMail", fields: [senderId], references: [id])
+  senderId    Int?
+  recipient   User?   @relation("receivedMail", fields: [recipientId], references: [id])
+  recipientId Int?
+  body        String?
 }
