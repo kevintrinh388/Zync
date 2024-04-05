@@ -1,24 +1,35 @@
 var express = require("express");
 var router = express.Router();
+const { PrismaClient } = require('@prisma/client')
+const prisma = new PrismaClient()
 
-/* GET mails listing. We want to query database to find users ID using the username
-we get from front end, after we get id we would use id to find the mails that has 
-the id that are either sender or recipient */
-router.get("/", function (req, res, next) {
-    /* const userID = await prisma.user.findUnique({
+router.get("/:username", async function (req, res, next) {
+    const userId = await prisma.user.findUnique({
         where: {
             username: req.params.username,
         },
         select: {
             id: true
         }
-    })
-   /* const mail = await prisma.mail.findMany({
-        where: {
+    }).then(data => data.id);
 
+   const mail = await prisma.mail.findMany({
+        where: {
+            OR: [
+                {
+                    senderId: userId
+                },
+                {
+                    recipientId: userId
+                }
+            ]
+        },
+        select: {
+            id: true,
+            body: true
         }
-    }) */
-  res.send("Hello world");
+    })
+  res.send(mail);
 });
 
 module.exports = router;
